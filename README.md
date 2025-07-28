@@ -1,46 +1,96 @@
-# Getting Started with Create React App
+🧠 AI-Powered Form Builder (React + Form.io + Gemini)
+This project is a drag-and-drop form builder that lets users:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+✅ Build forms visually using Form.io components
 
-## Available Scripts
+🤖 Use AI (Gemini) to generate/update form fields based on natural language prompts
 
-In the project directory, you can run:
+💾 Save form schema to a backend (MongoDB via Node.js)
 
-### `npm start`
+👀 Preview and test the form instantly
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+📸 Features
+Drag & drop form components from a palette
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Live preview of the form as you build
 
-### `npm test`
+AI-assisted form generation using natural language prompts
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Save the generated form schema to backend
 
-### `npm run build`
+Easily extendable and modular
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+🛠️ Tech Stack
+Frontend: React, TypeScript, Form.io (@formio/react), Axios
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+AI Prompting: Gemini API
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Backend: Node.js + Express (for API routes)
 
-### `npm run eject`
+Database: MongoDB (to save form schema)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+🧩 Folder Structure (Frontend)
+src/
+│
+├── components/
+│   ├── FormBuilder.tsx          # Main builder interface
+│   └── GeminiFormGenerator.tsx  # AI prompt chat interface
+│
+├── App.tsx
+└── index.tsx
+🚀 How to Run
+1. Clone the Repo
+git clone https://github.com/your-username/ai-form-builder.git
+cd ai-form-builder
+2. Install Dependencies
+npm install
+3. Start the Frontend
+npm start
+App will run at: http://localhost:3000
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. Start the Backend (if applicable)
+Ensure you have Node.js + MongoDB setup.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+cd backend
+npm install
+npm run dev
+Backend API will run at: http://localhost:5000
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+⚙️ Backend API Endpoints
+POST /api/forms/save → Save generated form schema
 
-## Learn More
+POST /api/gemini-generate/save-ai-form → Generate form schema from AI using a prompt
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+✨ How It Works
+🎯 Drag & Drop
+Choose a field (TextField, Email, Number, etc.) from the palette
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Drop it in the builder area
+
+Live preview appears on the right
+
+🤖 AI Prompt
+Type prompts like:
+
+"Create a form with name, email, and date of birth"
+
+"Add phone number and submit button"
+
+Gemini will return a valid Form.io schema and update your builder
+
+💾 Save Schema
+Click “Save Form Schema” to persist the form in your backend database
+
+📦 Available Components
+TextField, TextArea, Number, Email, Password, Phone Number
+
+Checkbox, Radio, Select
+
+Button, DateTime, Panel, Columns, FieldSet
+
+Static HTML & Content blocks
+
+🧪 Example Prompt
+“Create a user registration form with name, email, password, and submit button”
+
+🧠 Gemini will convert this into structured form JSON using Form.io components.
