@@ -76,24 +76,28 @@ const FormBuilder: React.FC = () => {
     setComponents((prev) => [...prev, newComponent]);
   };
 
- const addGeneratedComponents = (newFields: ComponentType[]) => {
+const addGeneratedComponents = (newFields: ComponentType[]) => {
   setComponents((prevComponents) => {
-    const updated = [...prevComponents];
+    const existingMap = new Map(prevComponents.map((comp) => [comp.key, comp]));
+    const updated: ComponentType[] = [];
 
     newFields.forEach((newField) => {
-      const existingIndex = updated.findIndex((c) => c.key === newField.key);
-      if (existingIndex !== -1) {
-        // ✅ Update the existing field
-        updated[existingIndex] = { ...updated[existingIndex], ...newField };
+      const existing = existingMap.get(newField.key);
+      if (existing) {
+        updated.push({ ...existing, ...newField }); // merge & preserve order
+        existingMap.delete(newField.key);
       } else {
-        // ✅ Add only if it's new
-        updated.push(newField);
+        updated.push(newField); // new field from AI
       }
     });
+
+    // Optional: Add untouched fields at the end (if any)
+    // updated.push(...existingMap.values());
 
     return updated;
   });
 };
+
 
 
   const handleDragOver = (e: React.DragEvent) => {
