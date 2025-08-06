@@ -11,3 +11,19 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Hide the error summary at the top */
+.formio-errors.alert.alert-danger {
+  display: none !important;
+}
+
+/* Hide error messages under fields */
+.has-error .form-control-feedback,
+.has-error .form-text {
+  display: none !important;
+}
+
+/* Optional: remove red borders on error */
+.has-error .form-control {
+  border-color: #ccc !important;
+  box-shadow: none !important;
+}

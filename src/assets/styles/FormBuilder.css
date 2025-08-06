@@ -1,0 +1,78 @@
+/* src/assets/styles/FormBuilder.css */
+
+.form-builder-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.form-builder-sidebar {
+  width: 200px;
+  border-right: 1px solid #ccc;
+}
+
+.form-builder-draggable {
+  border: 1px solid #999;
+  padding: 8px;
+  margin: 6px 0;
+  cursor: grab;
+  background: #f0f0f0;
+}
+
+.form-builder-main {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+}
+
+.form-builder-dropzone {
+  flex: 1;
+  min-height: 400px;
+  border: 2px dashed #aaa;
+  padding: 20px;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.clear-button {
+  padding: 10px 20px;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.form-builder-ai-section {
+  flex: 1;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+.form-builder-preview {
+  width: 400px;
+}
+
+.form-builder-json {
+  max-height: 200px;
+  overflow: auto;
+  background: #f9f9f9;
+  padding: 10px;
+}
+.save-form-button {
+  padding: 10px 20px;
+  margin: 10px;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.save-form-button:hover {
+  background: #45a049;
+}
