@@ -49,12 +49,5 @@ export const defaultValues = [
     inline: true,
     aliases: ["feedback", "radio", "ラジオボタン"]
   },
-  {
-    type: "checkbox",
-    key: "newsletter",
-    label: { en: "Subscribe to newsletter", jp: "ニュースレターを購読する" },
-    defaultValue: false,
-    input: true,
-    aliases: ["newsletter", "checkbox", "チェックボックス"]
-  }
+  
 ];
