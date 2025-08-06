@@ -1,22 +1,7 @@
 // defaultValues.ts
 
 export const defaultValues = [
-  {
-    type: "textfield",
-    key: "name",
-    label: { en: "Name", jp: "氏名" },
-    defaultValue: "Sunil Pawar",
-    input: true,
-    aliases: ["name", "氏名"]
-  },
-  {
-    type: "email",
-    key: "email",
-    label: { en: "Email", jp: "メール" },
-    defaultValue: "sunil@example.com",
-    input: true,
-    aliases: ["email", "メール"]
-  },
+ 
   {
     type: "select",
     key: "gender",
