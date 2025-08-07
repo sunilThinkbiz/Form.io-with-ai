@@ -14,6 +14,7 @@ export const useFormBuilder = () => {
       console.error("Manual save failed", error);
       toast.error("Failed to save form");
     }
+    setComponents([])
   };
 
   const clearForm = async () => {
@@ -31,6 +32,7 @@ export const useFormBuilder = () => {
       const existingMap = new Map(
         prevComponents.map((comp) => [comp.key, comp])
       );
+      const updatedKeys = new Set(newFields.map((field) => field.key));
       const merged: ComponentType[] = [];
 
       newFields.forEach((newField) => {
@@ -43,8 +45,9 @@ export const useFormBuilder = () => {
       });
 
       const remaining = prevComponents.filter(
-        (comp) => !newFields.some((nf) => nf.key === comp.key)
+        (comp) => !updatedKeys.has(comp.key)
       );
+      console.log(remaining)
       return [...remaining, ...merged];
     });
   };

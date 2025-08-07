@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { enforceRulesOnComponents } from "../utils/rulesEngine";
 import { AI_SAVE_DATA } from "../AppConstant";
 import { defaultValues } from "../common/defaultValuesJson";
+
 interface Component {
   type?: string;
   key?: string;
@@ -20,9 +21,10 @@ export const useGeminiForm = (
   const [chatHistory, setChatHistory] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [pendingComponents, setPendingComponents] = useState<
-    Component[] | null
-  >(null);
+  const [pendingComponents, setPendingComponents] = useState<Component[] | null>(null);
+  const [pendingGeminiComponents, setPendingGeminiComponents] = useState<Component[] | null>(null);
+  const [acceptedUnmatchedKeys, setAcceptedUnmatchedKeys] = useState<string[]>([]);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,6 +40,14 @@ export const useGeminiForm = (
     });
   };
 
+  const reorderComponents = (updated: Component[]): Component[] => {
+    const updatedKeys = updated.map((c) => c.key);
+    const existingMap = new Map(existingComponents.map((c) => [c.key, c]));
+    const reordered = updated.map((c) => ({ ...existingMap.get(c.key), ...c }));
+    const leftover = existingComponents.filter((c) => !updatedKeys.includes(c.key));
+    return [...reordered, ...leftover];
+  };
+
   const handleSend = async () => {
     const userInput = prompt.trim();
     if (!userInput) return;
@@ -47,44 +57,42 @@ export const useGeminiForm = (
     setLoading(true);
     setError("");
 
-    // If waiting for confirmation to add unmatched components
-    if (
-      pendingComponents &&
-      ["yes", "はい"].includes(userInput.toLowerCase())
-    ) {
-      const validComponents = enforceRulesOnComponents(
-        pendingComponents,
-        setError
-      );
-      addGeneratedComponents(validComponents);
+    const normalizedInput = userInput.toLowerCase();
+
+    if (pendingComponents && pendingGeminiComponents) {
+      if (["yes", "はい"].includes(normalizedInput)) {
+        const valid = enforceRulesOnComponents(pendingComponents, setError);
+        addGeneratedComponents(pendingGeminiComponents);
+        setAcceptedUnmatchedKeys((prev) => [
+          ...prev,
+          ...pendingComponents
+            .map((c) => c.key)
+            .filter((key): key is string => typeof key === "string"),
+        ]);
+      } else if (["no", "いいえ"].includes(normalizedInput)) {
+        const filtered = pendingGeminiComponents.filter(
+          (c) => !pendingComponents.some((un) => un.key === c.key)
+        );
+        addGeneratedComponents(filtered);
+      } else {
+        setError("Please reply with 'yes' or 'no' to confirm unmatched fields.");
+        setLoading(false);
+        return;
+      }
+
       setPendingComponents(null);
+      setPendingGeminiComponents(null);
       setLoading(false);
       return;
     }
 
-    // If user says "no", cancel pending addition
-    if (
-      pendingComponents &&
-      ["no", "いいえ"].includes(userInput.toLowerCase())
-    ) {
-      toast.info("✅ Skipped creation of unmatched fields.");
-      setPendingComponents(null);
-      setLoading(false);
-      return;
-    }
-
-    const isJapanesePrompt = (text: string = "") => {
-      return /[\u3000-\u303F\u3040-\u30FF\u4E00-\u9FAF]/.test(text);
-    };
-
-    // Normalize utility (without lowercasing)
+    const isJapanesePrompt = (text: string = "") => /[\u3000-\u303F\u3040-\u30FF\u4E00-\u9FAF]/.test(text);
     const normalize = (text: string = "") => text.replace(/\s+/g, "").trim();
 
     const language = isJapanesePrompt(userInput) ? "jp" : "en";
 
     const requestedDefaults = defaultValues.filter((field) => {
       const input = normalize(userInput);
-
       const fieldKey = normalize(field.key);
       const fieldLabels = Object.values(field.label || {}).map(normalize);
       const fieldAliases = (field.aliases || []).map(normalize);
@@ -95,11 +103,12 @@ export const useGeminiForm = (
         fieldAliases.some((alias) => input.includes(alias))
       );
     });
+
     const finalFields = requestedDefaults.map((field) => ({
       ...field,
-      label: field.label[language] || field.label.en, // fallback to EN
+      label: field.label[language] || field.label.en,
     }));
-    // ✅ If matches found, add them to the form
+
     if (finalFields.length > 0) {
       addGeneratedComponents(finalFields);
       setLoading(false);
@@ -123,23 +132,23 @@ export const useGeminiForm = (
       }
 
       const matched = matchFormFields(components);
-      const unmatched = components.filter((c: any) => !matched.includes(c));
-
-      const validMatched = enforceRulesOnComponents(matched, setError);
-      if (validMatched.length > 0) {
-        addGeneratedComponents(validMatched);
-      }
+      const unmatched = components.filter(
+        (c: any) => !matched.includes(c) && !acceptedUnmatchedKeys.includes(c.key)
+      );
 
       if (unmatched.length > 0) {
-        toast.info(
-          "⚠️ Some fields do not match the selected file. Please confirm."
-        );
+        toast.info("⚠️ Some fields do not match the selected file. Please confirm.");
         setError(
           `Some fields are not recognized: ${unmatched
             .map((c: any) => c.key || c.type)
-            .join(", ")}. Reply with "yes" to add them or "no" to ignore.`
+            .join(", ")}. Reply with \"yes\" to add them or \"no\" to ignore.`
         );
         setPendingComponents(unmatched);
+        setPendingGeminiComponents(components);
+      } else {
+        const reordered = reorderComponents(components);
+        const valid = enforceRulesOnComponents(reordered, setError);
+        addGeneratedComponents(valid);
       }
     } catch (err: any) {
       setError(err?.message || "❌ Error generating form");

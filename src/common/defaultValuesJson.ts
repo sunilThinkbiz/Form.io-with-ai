@@ -49,5 +49,4 @@ export const defaultValues = [
     inline: true,
     aliases: ["feedback", "radio", "ラジオボタン"]
   },
-  
 ];
