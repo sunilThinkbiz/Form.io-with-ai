@@ -62,10 +62,10 @@ export const useGeminiForm = (
     if (pendingComponents && pendingGeminiComponents) {
       if (["yes", "はい"].includes(normalizedInput)) {
         const valid = enforceRulesOnComponents(pendingComponents, setError);
-        addGeneratedComponents(pendingGeminiComponents);
+        addGeneratedComponents(valid);
         setAcceptedUnmatchedKeys((prev) => [
           ...prev,
-          ...pendingComponents
+          ...valid
             .map((c) => c.key)
             .filter((key): key is string => typeof key === "string"),
         ]);
