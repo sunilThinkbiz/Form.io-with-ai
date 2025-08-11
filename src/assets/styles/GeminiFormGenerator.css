@@ -51,7 +51,15 @@
   font-size: 14px;
   max-width: 75%;
 }
-
+.gemini-form__response {
+  align-self: flex-start;
+  color: #000;
+  background-color: #dcf8c6;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  max-width: 75%;
+}
 .gemini-form__input {
   display: flex;
   border-top: 1px solid #ddd;
