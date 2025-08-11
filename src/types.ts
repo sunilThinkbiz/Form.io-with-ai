@@ -32,3 +32,4 @@ export type ComponentType = {
   components?: ComponentType[]; // Include nested components
   [key: string]: any;
 };
+

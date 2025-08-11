@@ -47,7 +47,6 @@ export const useFormBuilder = () => {
       const remaining = prevComponents.filter(
         (comp) => !updatedKeys.has(comp.key)
       );
-      console.log(remaining)
       return [...remaining, ...merged];
     });
   };
@@ -62,6 +61,6 @@ export const useFormBuilder = () => {
     clearForm,
     addGeneratedFields,
     addComponent,
-    handleSaveForm, // ✅ call this manually on Save button click
+    handleSaveForm, 
   };
 };
