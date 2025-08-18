@@ -29,6 +29,7 @@ export type ComponentType = {
     minLength?: number;
   };
 
-  components?: ComponentType[]; // Include nested components
+  columns?: { components: ComponentType[] }[]; // Include nested components
   [key: string]: any;
 };
+
