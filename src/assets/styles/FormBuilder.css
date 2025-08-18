@@ -110,3 +110,42 @@
   font-size: 18px;
   cursor: pointer;
 }
+/* Textarea style */
+.auto-generate-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap; /* prevents overflow if space is tight */
+}
+
+.styled-textarea {
+  flex: 1 1 auto; /* grows to fill available space */
+  min-width: 250px;
+  max-width: fit-content; /* set your preferred max width */
+  min-height: 80px;
+  padding: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.generate-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  height: fit-content; /* keeps button height tidy */
+}
+
+.generate-btn:hover {
+  background-color: #45a049;
+}
+
+

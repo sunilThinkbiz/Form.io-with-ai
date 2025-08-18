@@ -6,12 +6,16 @@ import { AI_SAVE_DATA } from "../AppConstant";
 import { defaultValues } from "../common/defaultValuesJson";
 
 import { USER, AI, YES_RESPONSES, NO_RESPONSES } from "../AppConstant";
+import { createAutoGenerateContainer } from "../utils/componentFactory";
+import { ComponentType } from "../types";
 
 type MessageType = "user" | "ai";
 
 interface Component {
   type?: string;
   key?: string;
+  customClass?: string;
+  columns?: { components: Component[] }[]; // ✅ add this
   [key: string]: any;
 }
 interface ChatMessage {
@@ -50,6 +54,13 @@ export const useGeminiForm = (
   const enforceRules = (components: Component[]) =>
     enforceRulesOnComponents(components, setError);
 
+  const getComponentByCommand = (command: string, generated: Component[]) => {
+    if (command.toLowerCase().includes("autogenerate")) {
+      return generated.find((c) => c.key === "autoGenerateContainer") || null;
+    }
+    return null;
+  };
+
   const matchFormFields = (components: Component[]): Component[] => {
     const keys = formFields.map((f) => (f.key || f.type || "").toLowerCase());
     return components.filter((comp) => {
@@ -59,21 +70,51 @@ export const useGeminiForm = (
     });
   };
 
-  const reorderComponents = (updated: Component[]): Component[] => {
-    const updatedKeys = updated.map((c) => c.key);
-    const existingMap = new Map(existingComponents.map((c) => [c.key, c]));
+ const reorderComponents = (updated: Component[]): Component[] => {
+  const reorderRecursive = (updatedList: Component[], existingList: Component[]): Component[] => {
+    const existingMap = new Map(existingList.map((c) => [c.key, c]));
+    const final: Component[] = [];
 
-    const reordered = updated.map((c) => {
-      const existing = existingMap.get(c.key);
-      return existing ? { ...existing, ...c } : c;
-    });
+    // 1. Respect AI’s order
+    for (const comp of updatedList) {
+      const existing = existingMap.get(comp.key);
 
-    const leftover = existingComponents.filter(
-      (c) => !updatedKeys.includes(c.key)
-    );
+      let merged: Component;
+      if (existing) {
+        merged = { ...existing, ...comp };
+      } else {
+        merged = comp;
+      }
 
-    return [...reordered, ...leftover];
+      // ✅ handle nested columns recursively
+      if (comp.columns && comp.columns.length > 0) {
+        merged.columns = comp.columns.map((col, idx) => {
+          const existingCol = existing?.columns?.[idx];
+          return {
+            ...col,
+            components: reorderRecursive(col.components, existingCol?.components || []),
+          };
+        });
+      }
+
+      final.push(merged);
+    }
+
+    // 2. Append leftovers (keep old order)
+    const updatedKeys = new Set(updatedList.map((c) => c.key));
+    for (const old of existingList) {
+      if (!updatedKeys.has(old.key)) {
+        final.push(old);
+      }
+    }
+
+    return final;
   };
+
+  return reorderRecursive(updated, existingComponents);
+};
+
+
 
   const handleSend = async () => {
     const userInput = prompt.trim();
@@ -84,6 +125,7 @@ export const useGeminiForm = (
     setError("");
 
     const normalizedInput = userInput.toLowerCase();
+
     if (pendingComponents && pendingGeminiComponents) {
       if (YES_RESPONSES.includes(normalizedInput)) {
         const validMatched = enforceRules(pendingComponents);
@@ -156,13 +198,48 @@ export const useGeminiForm = (
         },
       });
 
-      const components = res?.data?.formSchema?.components || [];
+      const components: Component[] = res?.data?.formSchema?.components || [];
       if (components.length === 0) {
         return setError("❌ No components received from AI.");
       }
+      if (normalizedInput.includes("autogenerate")) {
+        // Check if it already exists
+        const alreadyExists = (components || []).some((c) =>
+          c.key?.startsWith("autoGenerate_")
+        );
 
-      // Corrected version
-      const matched = matchFormFields(components);
+        if (alreadyExists) {
+          addChatMessage(
+            AI,
+            `ℹ️ Auto Generate Field already exists, just reposition it.`
+          );
+          setLoading(false);
+          return;
+        }
+
+        const found = formFields.find((c) => c.key === "autoGenerateContainer");
+
+        let autoField: ComponentType | undefined;
+        if (found && "label" in found && "key" in found) {
+          autoField = found as ComponentType;
+        }
+
+        if (autoField) {
+          const newComponent = createAutoGenerateContainer(autoField);
+          addGeneratedComponents([newComponent]);
+          addChatMessage(AI, `✅ Auto Generate Field added successfully.`);
+        } else {
+          addChatMessage(AI, `❌ Auto Generate Field definition not found.`);
+        }
+
+        setLoading(false);
+        return
+      }
+
+      const autogenerate = getComponentByCommand(userInput, components);
+      const matched = matchFormFields(
+        autogenerate ? [autogenerate] : components
+      );
 
       const updatedFields = matched.filter((newField) => {
         const existingField = existingComponents.find(
@@ -203,6 +280,7 @@ export const useGeminiForm = (
         setPendingGeminiComponents(components);
       } else {
         const reordered = reorderComponents(components);
+        console.log(reordered,"reordered")
         const valid = enforceRules(reordered);
         if (valid.length > 0) {
           addGeneratedComponents(valid);
@@ -245,10 +323,7 @@ export const useGeminiForm = (
           }
         } else {
           // ❌ No valid components — enforceRules probably already set an error
-          addChatMessage(
-            AI,
-            `❌ Could not add due to validation errors.`
-          );
+          addChatMessage(AI, `❌ Could not add due to validation errors.`);
         }
       }
     } catch (err: any) {

@@ -8,6 +8,7 @@ import Sidebar from "./Sidebar";
 import Dropzone from "./Dropzone";
 import LivePreview from "./LivePreview";
 import { HEADERS } from "../AppConstant";
+import { createAutoGenerateContainer } from "../utils/componentFactory";
 
 const FormBuilder: React.FC = () => {
   const {
@@ -16,6 +17,7 @@ const FormBuilder: React.FC = () => {
     handleSaveForm,
     addComponent,
     addGeneratedFields,
+    setComponents
   } = useFormBuilder();
 
   const handleDragStart = (component: ComponentType, e: DragEvent) => {
@@ -27,15 +29,17 @@ const FormBuilder: React.FC = () => {
     const data = e.dataTransfer.getData("component");
     const dragged = JSON.parse(data);
 
-    const newComponent: ComponentType = {
-      type: dragged.type,
-      key: `${dragged.type}_${Date.now()}`,
-      label: dragged.label,
-      placeholder: dragged.placeholder || "",
-      value: "",
-      input: true,
-      validate: { required: false },
-    };
+    let newComponent: ComponentType;
+
+    if (dragged.key === "autoGenerateContainer") {
+      // Keep layout and apply classes
+      newComponent = createAutoGenerateContainer(dragged);
+    } else {
+      newComponent = {
+        ...dragged,
+        key: `${dragged.type}_${Date.now()}`,
+      };
+    }
 
     addComponent(newComponent);
   };
@@ -67,6 +71,7 @@ const FormBuilder: React.FC = () => {
           formSchema={formSchema}
           handleSaveForm={handleSaveForm}
           clearForm={clearForm}
+          setComponents={setComponents}
         />
 
         <section className="form-builder-ai-section">

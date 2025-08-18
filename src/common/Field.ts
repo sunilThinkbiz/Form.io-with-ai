@@ -1,6 +1,38 @@
 export const componentPalette = [
   { type: "textfield", label: "Text Field", placeholder: "Enter text" },
   { type: "textarea", label: "Text Area", placeholder: "Enter long text" },
+
+  // Auto Generate Field - styled directly here
+  {
+    type: "columns",
+    label: "Auto Generate Field",
+    key: "autoGenerateContainer",
+    columns: [
+      {
+        components: [
+          {
+            type: "textarea",
+            label: "Auto Generate",
+            key: "autoGenerateText",
+            placeholder: "Enter your prompt to generate content...",
+          }
+        ]
+      },
+      {
+        components: [
+          {
+           type: "button",
+            label: "Generate",
+            key: "generateButton",
+            action: "event",      // tells Form.io to trigger custom event
+            event: "generateClick", // event name we’ll listen for
+            theme: "success",
+          }
+        ]
+      }
+    ]
+  },
+
   { type: "number", label: "Number", placeholder: "Enter number" },
   { type: "email", label: "Email", placeholder: "Enter email" },
   { type: "password", label: "Password", placeholder: "Enter password" },

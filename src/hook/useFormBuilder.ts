@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 
 export const useFormBuilder = () => {
   const [components, setComponents] = useState<ComponentType[]>([]);
-
   const handleSaveForm = async () => {
     try {
       await saveFormToBackend(components);
@@ -62,5 +61,6 @@ export const useFormBuilder = () => {
     addGeneratedFields,
     addComponent,
     handleSaveForm, 
+    
   };
 };
